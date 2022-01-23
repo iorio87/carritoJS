@@ -9,6 +9,15 @@ eventListeners()
 function eventListeners () {
     //cuando se agrega un curso presionando 'agregar al carrito'
     listaCursos.addEventListener('click', agregarCurso)
+
+    //elimina cursos del carrito
+    carrito.addEventListener('click', eliminarCurso)
+
+    //vaciar carrito
+    vaciarCarrito.addEventListener('click', () => {
+        carritoCompras = [] //resetea el arreglo
+        limpiarHTML() // elimina todo el HTML creado
+    })
     
 }
 
@@ -20,6 +29,18 @@ function agregarCurso (e) {
         LeerContenido(cursoSeleccionado)
     }
     
+}
+
+function eliminarCurso(e) {
+    if(e.target.classList.contains('borrar-curso')) {
+        const cursoID = e.target.getAttribute('data-id')
+
+        //eliminar del carrito por el dataid
+        carritoCompras = carritoCompras.filter(curso => curso.id !== cursoID)
+
+        console.log(carritoCompras);
+        carritoHTML()
+    }
 }
 
 //Lee el contenido del HTML que clickeamos
@@ -36,9 +57,26 @@ function LeerContenido(curso) {
     AgregarArticulo(infoCurso)
 }
 
-function AgregarArticulo(curso) {
-    carritoCompras = [...carritoCompras, curso]
-
+function AgregarArticulo(infoCurso) {
+    //Revisa si ya existe    
+    const existe = carritoCompras.some(curso => curso.id === infoCurso.id)
+    if (existe) {
+        // se actualiza la cantidad
+        const cursos = carritoCompras.map(curso => {
+            if (curso.id === infoCurso.id) {
+                curso.cantidad++
+                return curso
+            } else {
+                return curso
+            }
+        })
+        carritoCompras = [...cursos]
+        
+    } else {
+        carritoCompras = [...carritoCompras, infoCurso]
+    }
+    
+    console.log(carritoCompras);
     carritoHTML()
 }
 
@@ -50,10 +88,18 @@ function carritoHTML() {
 
     //recorre el carrito y genera el HTML
     carritoCompras.forEach(curso => {
+        const {imagen, nombre, precio, cantidad, id} = curso
+        console.log(curso);
         const row = document.createElement('tr')
         row.innerHTML = `
         <td>
-            ${curso.nombre}
+            <img src='${imagen}' width=100>
+        </td>
+        <td>${nombre}</td>
+        <td>${precio}</td>
+        <td>${cantidad}</td>
+        <td>
+            <a href='#' class='borrar-curso' data-id='${id}'> X </a>
         </td>
         `
         //agrega el HTML en el tbody (en la tabla)
